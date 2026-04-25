@@ -1600,6 +1600,7 @@ void CChat::OnRender()
 	if(m_Mode != MODE_NONE)
 	{
 		Ui()->StartCheck();
+		Ui()->Update(vec2(-1, -1), true);
 	}
 
 	// send pending chat messages
@@ -2014,6 +2015,7 @@ void CChat::OnRender()
 		const vec2 CursorPos = m_SelectorMouse / WindowSize * vec2(pUiScreen->w, pUiScreen->h);
 		RenderTools()->RenderCursor(CursorPos, 24.0f);
 		Ui()->FinishCheck();
+		GameClient()->m_Hud.m_CursorPos = CursorPos;
 	}
 }
 

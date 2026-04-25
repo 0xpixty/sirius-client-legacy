@@ -793,14 +793,14 @@ void CTranslate::OnRender()
 			return false; // Keep ongoing tasks
 		if(*Done)
 		{
-			if(!Job.m_pTranslateResponse->m_Auto)
+			if(Job.m_pTranslateResponse->m_Auto)
 			{
 				if(!HandleLanguageWhitelist(Job.m_pTranslateResponse->m_Language))
 				{
 					Job.m_pTranslateResponse->m_Text[0] = '\0';
 				}
 
-				if(HandleLanguageBlacklist(Job.m_pTranslateResponse->m_Language))
+				else if(HandleLanguageBlacklist(Job.m_pTranslateResponse->m_Language))
 				{
 					Job.m_pTranslateResponse->m_Text[0] = '\0';
 				}
