@@ -789,6 +789,14 @@ void CItems::RenderCosmeticLaser(const CNetObj_CosmeticLaser *pPrev, const CNetO
 	const int Flags = pCurrent->m_Flags;
 	const bool Anchored = Flags & COSMETIC_FLAG_ANCHORED;
 	const int Owner = pCurrent->m_Owner;
+	if(Owner >= 0)
+	{
+		const CGameClient::CClientData &ClientData = GameClient()->m_aClients[Owner];
+		if(!ClientData.m_Active || !ClientData.m_RenderInfo.Valid())
+			return;
+		if(!GameClient()->m_Snap.m_aCharacters[Owner].m_Active)
+			return;
+	}
 
 	const float IntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
 
@@ -962,6 +970,14 @@ void CItems::RenderCosmeticPickup(const CNetObj_CosmeticPickup *pPrev, const CNe
 	const int Flags = pCurrent->m_Flags;
 	const bool Anchored = Flags & COSMETIC_FLAG_ANCHORED;
 	const int Owner = pCurrent->m_Owner;
+	if(Owner >= 0)
+	{
+		const CGameClient::CClientData &ClientData = GameClient()->m_aClients[Owner];
+		if(!ClientData.m_Active || !ClientData.m_RenderInfo.Valid())
+			return;
+		if(!GameClient()->m_Snap.m_aCharacters[Owner].m_Active)
+			return;
+	}
 
 	int CurWeapon = std::clamp(pCurrent->m_Subtype, 0, NUM_WEAPONS - 1);
 	int QuadOffset = 2;
@@ -1049,6 +1065,14 @@ void CItems::RenderCosmeticProjectile(const CNetObj_CosmeticProjectile *pPrev, c
 	const int Flags = pCurrent->m_Flags;
 	const bool Anchored = Flags & COSMETIC_FLAG_ANCHORED;
 	const int Owner = pCurrent->m_Owner;
+	if(Owner >= 0)
+	{
+		const CGameClient::CClientData &ClientData = GameClient()->m_aClients[Owner];
+		if(!ClientData.m_Active || !ClientData.m_RenderInfo.Valid())
+			return;
+		if(!GameClient()->m_Snap.m_aCharacters[Owner].m_Active)
+			return;
+	}
 
 	int CurWeapon = std::clamp(pCurrent->m_Type, 0, NUM_WEAPONS - 1);
 	const float IntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
