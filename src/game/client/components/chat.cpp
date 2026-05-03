@@ -1108,7 +1108,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	FChatMsgCheckAndPrint(CurrentLine);
 
 	if(m_BacklogCurLine > 0)
-		m_BacklogCurLine = minimum(m_BacklogCurLine + 1, maximum(0, NumInitializedLines() - 1));
+		m_BacklogCurLine = minimum(m_BacklogCurLine + 1, GetMaxBacklogCurLine());
 
 	// play sound
 	int64_t Now = time();
@@ -1176,6 +1176,7 @@ void CChat::OnPrepareLines(float y)
 {
 	float x = 5.0f;
 	float FontSize = this->FontSize();
+	const int LinesToSkipForSelection = GetLinesToSkipForSelection();
 
 	const bool IsScoreBoardOpen = GameClient()->m_Scoreboard.IsActive() && (Graphics()->ScreenAspect() > 1.7f); // only assume scoreboard when screen ratio is widescreen(something around 16:9)
 	const bool ShowLargeArea = m_Show || (m_Mode != MODE_NONE && g_Config.m_ClShowChat == 1) || g_Config.m_ClShowChat == 2;
@@ -1203,7 +1204,6 @@ void CChat::OnPrepareLines(float y)
 	float TextBegin = Begin + RealMsgPaddingX / 2.0f;
 	int OffsetType = IsScoreBoardOpen ? 1 : 0;
 	m_LinesRendered = 0;
-	int LinesSkipped = 0;
 
 	for(int i = 0; i < MAX_LINES; i++)
 	{
@@ -1213,11 +1213,12 @@ void CChat::OnPrepareLines(float y)
 		if(Now > Line.m_Time + 16 * time_freq() && !m_PrevShowChat)
 			break;
 
-		if(LinesSkipped < m_BacklogCurLine)
-		{
-			LinesSkipped++;
+		if(i < LinesToSkipForSelection)
 			continue;
-		}
+
+		const int AdjustedIndex = i - LinesToSkipForSelection;
+		if(AdjustedIndex < m_BacklogCurLine)
+			continue;
 
 		const bool NeedsYOffsetRecalc = Line.m_aYOffset[OffsetType] < 0.0f;
 		const bool NeedsContainerRecreate = ForceRecreate || !Line.m_TextContainerIndex.Valid() || Line.m_RenderedOffsetType != OffsetType;
@@ -1577,6 +1578,20 @@ void CChat::OnPrepareLines(float y)
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
 }
 
+int CChat::GetLinesToSkipForSelection() const
+{
+	const bool IsSelecting = m_Mode != MODE_NONE && (m_Selecting || m_HasSelection);
+	if(!IsSelecting || m_BacklogCurLine != 0 || m_NewLineCounter <= 0)
+		return 0;
+
+	return minimum(m_NewLineCounter, maximum(0, NumInitializedLines() - 1));
+}
+
+int CChat::GetMaxBacklogCurLine() const
+{
+	return maximum(0, NumInitializedLines() - maximum(1, m_LinesRendered));
+}
+
 void CChat::OnRender()
 {
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
@@ -1760,7 +1775,7 @@ void CChat::OnRender()
 #endif
 		return;
 
-	m_BacklogCurLine = std::clamp(m_BacklogCurLine, 0, maximum(0, NumInitializedLines() - 1));
+	m_BacklogCurLine = std::clamp(m_BacklogCurLine, 0, GetMaxBacklogCurLine());
 
 	y -= ScaledFontSize;
 
@@ -1787,11 +1802,7 @@ void CChat::OnRender()
 
 	// When selecting, skip rendering new lines to keep the view stable
 	// Instead of adjusting mouse positions, we simply don't show the new messages until selection ends
-	int LinesToSkipForSelection = 0;
-	if(IsSelecting && m_NewLineCounter > 0 && m_BacklogCurLine == 0)
-	{
-		LinesToSkipForSelection = m_NewLineCounter;
-	}
+	const int LinesToSkipForSelection = GetLinesToSkipForSelection();
 	// Only reset counter when not selecting
 	if(!IsSelecting)
 		m_NewLineCounter = 0;
