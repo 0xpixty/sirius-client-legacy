@@ -32,28 +32,17 @@
 
 using namespace std::chrono_literals;
 
-enum
+enum SettingTab
 {
-	ENTITY_TAB_SETTINGS = 0,
-	ENTITY_TAB_VISUAL,
-	ENTITY_TAB_WARLIST,
-	ENTITY_TAB_STATUSBAR,
-	ENTITY_TAB_BINDWHEEL,
-	ENTITY_TAB_QUICKACTION,
-	ENTITY_TAB_INFO,
-	NUMBER_OF_ENTITY_TABS,
+	SETTINGS = 0,
+	VISUAL,
+	WARLIST,
+	STATUSBAR,
+	BINDWHEEL,
+	QUICKACTION,
+	INFO,
+	NUM_TABS,
 };
-
-typedef struct
-{
-	const char *m_pName;
-	const char *m_pCommand;
-	int m_KeyId;
-	int m_ModifierCombination;
-} CKeyInfo;
-
-static float s_Time = 0.0f;
-static bool s_StartedTime = false;
 
 const float ScrollSpeed = 100.0f;
 
@@ -86,38 +75,32 @@ const ColorRGBA BackgroundColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);
 
 void CMenus::RenderSettingsEntity(CUIRect MainView)
 {
-	s_Time += Client()->RenderFrameTime() * (1.0f / 100.0f);
-	if(!s_StartedTime)
-	{
-		s_StartedTime = true;
-		s_Time = (float)rand() / (float)RAND_MAX;
-	}
-
 	static int s_CurTab = 0;
 
 	CUIRect TabBar, Button;
 
-	int TabCount = NUMBER_OF_ENTITY_TABS;
-	for(int Tab = 0; Tab < NUMBER_OF_ENTITY_TABS; ++Tab)
+	const int NumTabs = SettingTab::NUM_TABS;
+	int ActiveTabs = NumTabs;
+	for(int Tab = 0; Tab < NumTabs; ++Tab)
 	{
 		if(IsFlagSet(g_Config.m_ClEClientSettingsTabs, Tab))
 		{
-			TabCount--;
+			ActiveTabs--;
 			if(s_CurTab == Tab)
 				s_CurTab++;
 		}
 	}
 
-	if(TabCount <= 0)
+	if(ActiveTabs <= 0)
 	{
 		RenderEClientInfoPage(MainView);
 		return;
 	}
 
 	MainView.HSplitTop(LineSize * 1.1f, &TabBar, &MainView);
-	const float TabWidth = TabBar.w / TabCount;
-	static CButtonContainer s_aPageTabs[NUMBER_OF_ENTITY_TABS] = {};
-	const char *apTabNames[NUMBER_OF_ENTITY_TABS] = {
+	const float TabWidth = TabBar.w / ActiveTabs;
+	static CButtonContainer s_aPageTabs[NumTabs] = {};
+	const char *apTabNames[NumTabs] = {
 		EcLocalize("Settings"),
 		EcLocalize("Visuals"),
 		EcLocalize("Warlist"),
@@ -127,10 +110,10 @@ void CMenus::RenderSettingsEntity(CUIRect MainView)
 		EcLocalize("Info"),
 	};
 
-	for(int Tab = 0; Tab < NUMBER_OF_ENTITY_TABS; ++Tab)
+	for(int Tab = 0; Tab < NumTabs; ++Tab)
 	{
 		int LeftTab = 0;
-		int RightTab = NUMBER_OF_ENTITY_TABS - 1;
+		int RightTab = NumTabs - 1;
 
 		if(IsFlagSet(g_Config.m_ClEClientSettingsTabs, Tab))
 			continue;
@@ -140,7 +123,7 @@ void CMenus::RenderSettingsEntity(CUIRect MainView)
 			if(IsFlagSet(g_Config.m_ClEClientSettingsTabs, i) && IsFlagSet(g_Config.m_ClEClientSettingsTabs, LeftTab))
 				LeftTab++;
 		}
-		for(int i = NUMBER_OF_ENTITY_TABS - 1; i > 0; --i)
+		for(int i = NumTabs - 1; i > 0; --i)
 		{
 			if(IsFlagSet(g_Config.m_ClEClientSettingsTabs, i) && IsFlagSet(g_Config.m_ClEClientSettingsTabs, RightTab))
 				RightTab--;
@@ -161,31 +144,31 @@ void CMenus::RenderSettingsEntity(CUIRect MainView)
 
 	MainView.HSplitTop(MarginSmall, nullptr, &MainView);
 
-	if(s_CurTab == ENTITY_TAB_SETTINGS)
+	if(s_CurTab == SettingTab::SETTINGS)
 	{
 		RenderSettingsEClient(MainView);
 	}
-	if(s_CurTab == ENTITY_TAB_VISUAL)
+	if(s_CurTab == SettingTab::VISUAL)
 	{
 		RenderSettingsVisual(MainView);
 	}
-	if(s_CurTab == ENTITY_TAB_WARLIST)
+	if(s_CurTab == SettingTab::WARLIST)
 	{
 		RenderSettingsWarList(MainView);
 	}
-	if(s_CurTab == ENTITY_TAB_STATUSBAR)
+	if(s_CurTab == SettingTab::STATUSBAR)
 	{
 		RenderSettingsStatusbar(MainView);
 	}
-	if(s_CurTab == ENTITY_TAB_BINDWHEEL)
+	if(s_CurTab == SettingTab::BINDWHEEL)
 	{
 		RenderSettingsBindwheel(MainView);
 	}
-	if(s_CurTab == ENTITY_TAB_QUICKACTION)
+	if(s_CurTab == SettingTab::QUICKACTION)
 	{
 		RenderSettingsQuickActions(MainView);
 	}
-	if(s_CurTab == ENTITY_TAB_INFO)
+	if(s_CurTab == SettingTab::INFO)
 	{
 		RenderEClientInfoPage(MainView);
 	}
@@ -475,10 +458,11 @@ void CMenus::RenderEClientInfoPage(CUIRect MainView)
 
 	static CButtonContainer s_LinkButton;
 	{
-		Label.VSplitLeft(TextRender()->TextWidth(LineSize, "qxdFox"), &Label, &Button);
+		const char *pName = "qxdFox";
+		Label.VSplitLeft(TextRender()->TextWidth(LineSize, pName), &Label, &Button);
 		Button.VSplitLeft(MarginSmall, nullptr, &Button);
 		Button.w = LineSize, Button.h = LineSize, Button.y = Label.y + (Label.h / 2.0f - Button.h / 2.0f);
-		Ui()->DoLabel(&Label, "qxdFox", LineSize, TEXTALIGN_ML);
+		Ui()->DoLabel(&Label, pName, LineSize, TEXTALIGN_ML);
 		if(Ui()->DoButton_FontIcon(&s_LinkButton, FontIcon::ARROW_UP_RIGHT_FROM_SQUARE, 0, &Button, BUTTONFLAG_LEFT))
 			Client()->ViewLink("https://github.com/qxdFox");
 	}
@@ -487,29 +471,29 @@ void CMenus::RenderEClientInfoPage(CUIRect MainView)
 	Ui()->DoLabel(&Label, "Hide Settings Tabs", LineSize, TEXTALIGN_ML);
 	LeftView.HSplitTop(LineSize, &LeftView, &LeftView);
 
-	static int s_ShowSettings = IsFlagSet(g_Config.m_ClEClientSettingsTabs, ENTITY_TAB_SETTINGS);
+	static int s_ShowSettings = IsFlagSet(g_Config.m_ClEClientSettingsTabs, SettingTab::SETTINGS);
 	DoButton_CheckBoxAutoVMarginAndSet(&s_ShowSettings, EcLocalize("Settings"), &s_ShowSettings, &LeftView, LineSize);
-	SetFlag(g_Config.m_ClEClientSettingsTabs, ENTITY_TAB_SETTINGS, s_ShowSettings);
+	SetFlag(g_Config.m_ClEClientSettingsTabs, SettingTab::SETTINGS, s_ShowSettings);
 
-	static int s_ShowVisal = IsFlagSet(g_Config.m_ClEClientSettingsTabs, ENTITY_TAB_VISUAL);
+	static int s_ShowVisal = IsFlagSet(g_Config.m_ClEClientSettingsTabs, SettingTab::VISUAL);
 	DoButton_CheckBoxAutoVMarginAndSet(&s_ShowVisal, EcLocalize("Visual"), &s_ShowVisal, &LeftView, LineSize);
-	SetFlag(g_Config.m_ClEClientSettingsTabs, ENTITY_TAB_VISUAL, s_ShowVisal);
+	SetFlag(g_Config.m_ClEClientSettingsTabs, SettingTab::VISUAL, s_ShowVisal);
 
-	static int s_ShowWarlist = IsFlagSet(g_Config.m_ClEClientSettingsTabs, ENTITY_TAB_WARLIST);
+	static int s_ShowWarlist = IsFlagSet(g_Config.m_ClEClientSettingsTabs, SettingTab::WARLIST);
 	DoButton_CheckBoxAutoVMarginAndSet(&s_ShowWarlist, EcLocalize("Warlist"), &s_ShowWarlist, &LeftView, LineSize);
-	SetFlag(g_Config.m_ClEClientSettingsTabs, ENTITY_TAB_WARLIST, s_ShowWarlist);
+	SetFlag(g_Config.m_ClEClientSettingsTabs, SettingTab::WARLIST, s_ShowWarlist);
 
-	static int s_ShowStatusBar = IsFlagSet(g_Config.m_ClEClientSettingsTabs, ENTITY_TAB_STATUSBAR);
+	static int s_ShowStatusBar = IsFlagSet(g_Config.m_ClEClientSettingsTabs, SettingTab::STATUSBAR);
 	DoButton_CheckBoxAutoVMarginAndSet(&s_ShowStatusBar, EcLocalize("Status Bar"), &s_ShowStatusBar, &LeftView, LineSize);
-	SetFlag(g_Config.m_ClEClientSettingsTabs, ENTITY_TAB_STATUSBAR, s_ShowStatusBar);
+	SetFlag(g_Config.m_ClEClientSettingsTabs, SettingTab::STATUSBAR, s_ShowStatusBar);
 
-	static int s_ShowBindwheel = IsFlagSet(g_Config.m_ClEClientSettingsTabs, ENTITY_TAB_BINDWHEEL);
+	static int s_ShowBindwheel = IsFlagSet(g_Config.m_ClEClientSettingsTabs, SettingTab::BINDWHEEL);
 	DoButton_CheckBoxAutoVMarginAndSet(&s_ShowBindwheel, EcLocalize("Bindwheel"), &s_ShowBindwheel, &LeftView, LineSize);
-	SetFlag(g_Config.m_ClEClientSettingsTabs, ENTITY_TAB_BINDWHEEL, s_ShowBindwheel);
+	SetFlag(g_Config.m_ClEClientSettingsTabs, SettingTab::BINDWHEEL, s_ShowBindwheel);
 
-	static int s_ShowQuickActions = IsFlagSet(g_Config.m_ClEClientSettingsTabs, ENTITY_TAB_QUICKACTION);
+	static int s_ShowQuickActions = IsFlagSet(g_Config.m_ClEClientSettingsTabs, SettingTab::QUICKACTION);
 	DoButton_CheckBoxAutoVMarginAndSet(&s_ShowQuickActions, EcLocalize("Quick Actions"), &s_ShowQuickActions, &LeftView, LineSize);
-	SetFlag(g_Config.m_ClEClientSettingsTabs, ENTITY_TAB_QUICKACTION, s_ShowQuickActions);
+	SetFlag(g_Config.m_ClEClientSettingsTabs, SettingTab::QUICKACTION, s_ShowQuickActions);
 
 	char DeathCounter[32];
 	str_format(DeathCounter, sizeof(DeathCounter), "%d death%s (all time)", GameClient()->m_EClient.m_KillCount, GameClient()->m_EClient.m_KillCount == 1 ? "" : "s");
@@ -529,49 +513,24 @@ void CMenus::RenderEClientInfoPage(CUIRect MainView)
 	Button.VSplitMid(&FilesLeft, &FilesRight, MarginSmall);
 
 	static CButtonContainer s_EClientConfig, s_Config, s_Warlist, s_Profiles, s_Chatbinds, s_FontFolder;
-	if(DoButtonLineSize_Menu(&s_EClientConfig, EcLocalize("E-Client Setting"), 0, &FilesRight, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
-	{
-		Storage()->GetCompletePath(IStorage::TYPE_SAVE, s_aConfigDomains[ConfigDomain::ENTITY].m_aConfigPath, aBuf, sizeof(aBuf));
-		Client()->ViewFile(aBuf);
-	}
-	FilesRight.HSplitTop(LineSize * 2.0f, &FilesRight, &FilesRight);
-	FilesRight.HSplitTop(Margin, &FilesRight, &FilesRight);
-	FilesRight.HSplitTop(LineSize * 2.0f, &FilesRight, 0);
-	if(DoButtonLineSize_Menu(&s_Config, EcLocalize("DDNet Settings"), 0, &FilesRight, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
-	{
-		Storage()->GetCompletePath(IStorage::TYPE_SAVE, s_aConfigDomains[ConfigDomain::DDNET].m_aConfigPath, aBuf, sizeof(aBuf));
-		Client()->ViewFile(aBuf);
-	}
 
-	FilesRight.HSplitTop(LineSize * 2.0f, &FilesRight, &FilesRight);
-	FilesRight.HSplitTop(Margin, &FilesRight, &FilesRight);
-	FilesRight.HSplitTop(LineSize * 2.0f, &FilesRight, 0);
-	if(DoButtonLineSize_Menu(&s_Profiles, EcLocalize("Profiles"), 0, &FilesRight, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
-	{
-		Storage()->GetCompletePath(IStorage::TYPE_SAVE, s_aConfigDomains[ConfigDomain::TCLIENTPROFILES].m_aConfigPath, aBuf, sizeof(aBuf));
-		Client()->ViewFile(aBuf);
-	}
+	auto DoButtonForConfig = [&](CButtonContainer *pButtonContainer, const char *pText, const char *pConfigPath) {
+		if(DoButtonLineSize_Menu(pButtonContainer, pText, 0, &FilesRight, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+		{
+			Storage()->GetCompletePath(IStorage::TYPE_SAVE, pConfigPath, aBuf, sizeof(aBuf));
+			Client()->ViewFile(aBuf);
+		}
+		FilesRight.HSplitTop(LineSize * 2.0f, &FilesRight, &FilesRight);
+		FilesRight.HSplitTop(Margin, &FilesRight, &FilesRight);
+		FilesRight.HSplitTop(LineSize * 2.0f, &FilesRight, 0);
+	};
 
-	FilesRight.HSplitTop(LineSize * 2.0f, &FilesRight, &FilesRight);
-	FilesRight.HSplitTop(Margin, &FilesRight, &FilesRight);
-	FilesRight.HSplitTop(LineSize * 2.0f, &FilesRight, 0);
+	DoButtonForConfig(&s_EClientConfig, EcLocalize("E-Client Setting"), s_aConfigDomains[ConfigDomain::ENTITY].m_aConfigPath);
+	DoButtonForConfig(&s_Config, EcLocalize("DDNet Settings"), s_aConfigDomains[ConfigDomain::DDNET].m_aConfigPath);
+	DoButtonForConfig(&s_Profiles, EcLocalize("Profiles"), s_aConfigDomains[ConfigDomain::TCLIENTPROFILES].m_aConfigPath);
+	DoButtonForConfig(&s_Warlist, EcLocalize("Warlist"), s_aConfigDomains[ConfigDomain::TCLIENTWARLIST].m_aConfigPath);
+	DoButtonForConfig(&s_Chatbinds, EcLocalize("Chatbinds"), s_aConfigDomains[ConfigDomain::TCLIENTCHATBINDS].m_aConfigPath);
 
-	if(DoButtonLineSize_Menu(&s_Warlist, EcLocalize("Warlist"), 0, &FilesRight, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
-	{
-		Storage()->GetCompletePath(IStorage::TYPE_SAVE, s_aConfigDomains[ConfigDomain::TCLIENTWARLIST].m_aConfigPath, aBuf, sizeof(aBuf));
-		Client()->ViewFile(aBuf);
-	}
-	FilesRight.HSplitTop(LineSize * 2.0f, &FilesRight, &FilesRight);
-	FilesRight.HSplitTop(Margin, &FilesRight, &FilesRight);
-	FilesRight.HSplitTop(LineSize * 2.0f, &FilesRight, 0);
-	if(DoButtonLineSize_Menu(&s_Chatbinds, EcLocalize("Chatbinds"), 0, &FilesRight, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
-	{
-		Storage()->GetCompletePath(IStorage::TYPE_SAVE, s_aConfigDomains[ConfigDomain::TCLIENTCHATBINDS].m_aConfigPath, aBuf, sizeof(aBuf));
-		Client()->ViewFile(aBuf);
-	}
-	FilesRight.HSplitTop(LineSize * 2.0f, &FilesRight, &FilesRight);
-	FilesRight.HSplitTop(Margin, &FilesRight, &FilesRight);
-	FilesRight.HSplitTop(LineSize * 2.0f, &FilesRight, 0);
 	if(DoButtonLineSize_Menu(&s_FontFolder, EcLocalize("Fonts Folder"), 0, &FilesRight, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
 		Storage()->CreateFolder("data/entity", IStorage::TYPE_ABSOLUTE);
@@ -594,17 +553,17 @@ void CMenus::RenderChatPreview(CUIRect MainView)
 {
 	CChat &Chat = GameClient()->m_Chat;
 
-	ColorRGBA SystemColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
-	ColorRGBA HighlightedColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageHighlightColor));
-	ColorRGBA TeamColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageTeamColor));
-	ColorRGBA FriendColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClFriendColor));
-	ColorRGBA SpecColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClSpecColor));
-	ColorRGBA EnemyColor = GameClient()->m_WarList.m_WarTypes[1]->m_Color;
-	ColorRGBA HelperColor = GameClient()->m_WarList.m_WarTypes[3]->m_Color;
-	ColorRGBA TeammateColor = GameClient()->m_WarList.m_WarTypes[2]->m_Color;
-	ColorRGBA NormalColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageColor));
-	ColorRGBA ClientColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageClientColor));
-	ColorRGBA DefaultNameColor(0.8f, 0.8f, 0.8f, 1.0f);
+	const ColorRGBA SystemColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
+	const ColorRGBA HighlightedColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageHighlightColor));
+	const ColorRGBA TeamColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageTeamColor));
+	const ColorRGBA FriendColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClFriendColor));
+	const ColorRGBA SpecColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClSpecColor));
+	const ColorRGBA EnemyColor = GameClient()->m_WarList.m_WarTypes[1]->m_Color;
+	const ColorRGBA HelperColor = GameClient()->m_WarList.m_WarTypes[3]->m_Color;
+	const ColorRGBA TeammateColor = GameClient()->m_WarList.m_WarTypes[2]->m_Color;
+	const ColorRGBA NormalColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageColor));
+	const ColorRGBA ClientColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageClientColor));
+	const ColorRGBA DefaultNameColor(0.8f, 0.8f, 0.8f, 1.0f);
 
 	const float RealFontSize = 10.0f;
 	const float RealMsgPaddingX = 12;
@@ -672,7 +631,7 @@ void CMenus::RenderChatPreview(CUIRect MainView)
 		PREVIEW_SPEC,
 		PREVIEW_CLIENT
 	};
-	auto &&SetPreviewLine = [](int Index, int ClientId, const char *pName, const char *pText, int Flag, int Repeats) {
+	auto &&SetPreviewLine = [&](int Index, int ClientId, const char *pName, const char *pText, int Flag, int Repeats, const CSkin *pSkin = nullptr) {
 		CPreviewLine *pLine;
 		if((int)s_vLines.size() <= Index)
 		{
@@ -695,12 +654,12 @@ void CMenus::RenderChatPreview(CUIRect MainView)
 		pLine->m_Teammate = Flag & FLAG_TEAMMATE;
 		str_copy(pLine->m_aName, pName);
 		str_copy(pLine->m_aText, pText);
-	};
-	auto &&SetLineSkin = [RealTeeSize](int Index, const CSkin *pSkin) {
-		if(Index >= (int)s_vLines.size())
-			return;
-		s_vLines[Index].m_RenderInfo.m_Size = RealTeeSize;
-		s_vLines[Index].m_RenderInfo.Apply(pSkin);
+
+		if(pSkin)
+		{
+			s_vLines[Index].m_RenderInfo.m_Size = RealTeeSize;
+			s_vLines[Index].m_RenderInfo.Apply(pSkin);
+		}
 	};
 
 	auto &&RenderPreview = [&](int LineIndex, int x, int y, bool Render = true) {
@@ -828,29 +787,20 @@ void CMenus::RenderChatPreview(CUIRect MainView)
 		else
 			SetPreviewLine(PREVIEW_SYS, -1, "*** ", aLineBuilder, 0, 0);
 		str_format(aLineBuilder, sizeof(aLineBuilder), "Hey, how are you %s?", aBuf);
-		SetPreviewLine(PREVIEW_HIGHLIGHT, 7, "Random Tee", aLineBuilder, FLAG_HIGHLIGHT, 0);
+		SetPreviewLine(PREVIEW_HIGHLIGHT, 7, "Random Tee", aLineBuilder, FLAG_HIGHLIGHT, 0, GameClient()->m_Skins.Find("pinky"));
 
-		SetPreviewLine(PREVIEW_TEAM, 11, "Your Teammate", "Let's speedrun this!", FLAG_TEAM, 0);
-		SetPreviewLine(PREVIEW_FRIEND, 8, "Friend", "Hello there", FLAG_FRIEND, 0);
-		SetPreviewLine(PREVIEW_SPAMMER, 9, "Spammer", "Hey fools, I'm spamming here!", 0, 5);
+		SetPreviewLine(PREVIEW_TEAM, 11, "Your Teammate", "Let's speedrun this!", FLAG_TEAM, 0, GameClient()->m_Skins.Find("default_flower"));
+		SetPreviewLine(PREVIEW_FRIEND, 8, "Friend", "Hello there", FLAG_FRIEND, 0, GameClient()->m_Skins.Find("turtle"));
+		SetPreviewLine(PREVIEW_SPAMMER, 9, "Spammer", "Hey fools, I'm spamming here!", 0, 5, GameClient()->m_Skins.Find("beast"));
 		if(g_Config.m_ClChatClientPrefix)
 			SetPreviewLine(PREVIEW_CLIENT, -1, g_Config.m_ClClientPrefix, "Echo command executed", FLAG_CLIENT, 0);
 		else
 			SetPreviewLine(PREVIEW_CLIENT, -1, "— ", "Echo command executed", FLAG_CLIENT, 0);
-		SetPreviewLine(PREVIEW_ENEMY, 6, "Enemy", "Nobo", FLAG_ENEMY, 0);
-		SetPreviewLine(PREVIEW_HELPER, 3, "Helper", "Ima help this random :>", FLAG_HELPER, 0);
-		SetPreviewLine(PREVIEW_TEAMMATE, 10, "Teammate", "Help me!", FLAG_TEAMMATE, 0);
-		SetPreviewLine(PREVIEW_SPEC, 11, "Random Spectator", "Crazy gameplay dude", FLAG_SPEC, 0);
+		SetPreviewLine(PREVIEW_ENEMY, 6, "Enemy", "Nobo", FLAG_ENEMY, 0, GameClient()->m_Skins.Find("default"));
+		SetPreviewLine(PREVIEW_HELPER, 3, "Helper", "Ima help this random :>", FLAG_HELPER, 0, GameClient()->m_Skins.Find("Robot"));
+		SetPreviewLine(PREVIEW_TEAMMATE, 10, "Teammate", "Help me!", FLAG_TEAMMATE, 0, GameClient()->m_Skins.Find("Catnoa"));
+		SetPreviewLine(PREVIEW_SPEC, 11, "Random Spectator", "Crazy gameplay dude", FLAG_SPEC, 0, GameClient()->m_Skins.Find("cammostripes"));
 	}
-
-	SetLineSkin(PREVIEW_HIGHLIGHT, GameClient()->m_Skins.Find("pinky"));
-	SetLineSkin(PREVIEW_TEAM, GameClient()->m_Skins.Find("default_flower"));
-	SetLineSkin(PREVIEW_FRIEND, GameClient()->m_Skins.Find("cammostripes"));
-	SetLineSkin(PREVIEW_SPAMMER, GameClient()->m_Skins.Find("beast"));
-	SetLineSkin(PREVIEW_ENEMY, GameClient()->m_Skins.Find("default"));
-	SetLineSkin(PREVIEW_HELPER, GameClient()->m_Skins.Find("Robot"));
-	SetLineSkin(PREVIEW_TEAMMATE, GameClient()->m_Skins.Find("Catnoa"));
-	SetLineSkin(PREVIEW_SPEC, GameClient()->m_Skins.Find("turtle"));
 
 	// Backgrounds first
 	if(!g_Config.m_ClChatOld)
@@ -948,6 +898,7 @@ void CMenus::RenderChatPreview(CUIRect MainView)
 
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
 }
+
 void CMenus::RenderSettingsStatusbar(CUIRect MainView)
 {
 	CUIRect LeftView, RightView, Button, Label, StatusBar;
