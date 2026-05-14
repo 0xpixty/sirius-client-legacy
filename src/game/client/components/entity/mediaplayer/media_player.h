@@ -34,7 +34,6 @@ public:
 		static constexpr int NUM_FREQUENCY_BANDS = 64; // Number of frequency bars
 		std::array<float, NUM_FREQUENCY_BANDS> m_aFrequencyBands; // 0.0 to 1.0
 		bool m_Active = false;
-		int64_t m_LastFrequencyChange = 0;
 
 		void GetBands(float *pOutBands, int NumBands) const;
 		float GetAverageBand() const;

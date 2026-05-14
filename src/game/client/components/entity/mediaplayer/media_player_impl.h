@@ -189,7 +189,6 @@ public:
 	std::mutex m_Mutex;
 	std::array<float, CMediaViewer::CVisualizer::NUM_FREQUENCY_BANDS> m_aFrequencyBands{};
 	bool m_Active = false;
-	int64_t m_LastFrequencyChange = 0;
 };
 #endif
 

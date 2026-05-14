@@ -55,7 +55,6 @@ namespace
 		std::scoped_lock Lock(pAudioCapture->m_Mutex);
 		pAudioCapture->m_aFrequencyBands.fill(0.0f);
 		pAudioCapture->m_Active = false;
-		pAudioCapture->m_LastFrequencyChange = 0;
 	}
 
 	std::string UrlDecode(const std::string &Encoded)
@@ -1152,17 +1151,6 @@ void CMediaViewer::AudioThreadMain()
 
 		while(!m_StopAudioThread.load(std::memory_order_relaxed))
 		{
-			bool TimedOut = false;
-			{
-				std::scoped_lock Lock(m_pAudioCapture->m_Mutex);
-				const int64_t LastChange = m_pAudioCapture->m_LastFrequencyChange;
-				if(LastChange == 0 || time_get() - LastChange > time_freq() * 10)
-				{
-					m_pAudioCapture->m_Active = false;
-					TimedOut = true;
-				}
-			}
-
 			pa_threaded_mainloop_lock(pMainLoop);
 			const pa_context_state_t ContextState = pa_context_get_state(pContext);
 			const pa_stream_state_t StreamState = pa_stream_get_state(pStream);
@@ -1209,7 +1197,6 @@ void CMediaViewer::ProcessAudioFrame(const float *pSamples, int NumSamples, int 
 	const float LogMin = std::log10(MinFreq);
 	const float LogMax = std::log10(MaxFreq);
 
-	bool AllZero = true;
 	for(int Band = 0; Band < NumBands; ++Band)
 	{
 		const float t0 = (float)Band / NumBands;
@@ -1233,8 +1220,6 @@ void CMediaViewer::ProcessAudioFrame(const float *pSamples, int NumSamples, int 
 			float Magnitude = Sum / Count;
 			Magnitude = std::log10(1.0f + Magnitude * 100.0f) / 2.0f;
 			Bands[Band] = std::clamp(Magnitude, 0.0f, 1.0f);
-			if(Magnitude > 0.001f)
-				AllZero = false;
 		}
 	}
 
@@ -1247,12 +1232,5 @@ void CMediaViewer::ProcessAudioFrame(const float *pSamples, int NumSamples, int 
 			Bands[i] * (1.0f - Smoothing);
 	}
 	m_pAudioCapture->m_Active = true;
-
-	if(!AllZero)
-		m_pAudioCapture->m_LastFrequencyChange = time_get();
-
-	const int64_t Now = time_get();
-	if(m_pAudioCapture->m_LastFrequencyChange == 0 || Now - m_pAudioCapture->m_LastFrequencyChange > time_freq() * 10)
-		m_pAudioCapture->m_Active = false;
 }
 #endif

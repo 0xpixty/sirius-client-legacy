@@ -653,14 +653,5 @@ void CMediaViewer::ProcessAudioFrame(const float *pSamples, int NumSamples, int 
 			Bands[i] * (1.0f - Smoothing);
 	}
 	m_pAudioCapture->m_Active = true;
-
-	if(!AllZero)
-		m_pAudioCapture->m_LastFrequencyChange = time_get();
-
-	const int TimeoutSec = 10;
-	const int64_t Now = time_get();
-	const int64_t Elapsed = Now - m_pAudioCapture->m_LastFrequencyChange;
-	if(m_pAudioCapture->m_LastFrequencyChange == 0 || Elapsed > time_freq() * TimeoutSec)
-		m_pAudioCapture->m_Active = false;
 }
 #endif

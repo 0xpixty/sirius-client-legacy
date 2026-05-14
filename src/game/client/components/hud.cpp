@@ -2943,7 +2943,7 @@ void CHud::RenderVisualizer(const CMediaViewer::CState &State, ColorRGBA Primary
 	for(int i = 0; i < NumBands; ++i)
 	{
 		const bool AlignCenter = g_Config.m_ClMediaIslandVisualizerAlignment == 2;
-		float Height = 0.15f + vRenderedBands[i] * 0.85f;
+		float Height = 0.2f + vRenderedBands[i] * 0.8f;
 		float BarHeight = Height * Size.y;
 
 		float X = Pos.x + i * BarWidth;

@@ -546,7 +546,6 @@ bool CMediaViewer::GetStateSnapshot(CMediaViewer::CState &State) const
 			std::scoped_lock Lock(m_pAudioCapture->m_Mutex);
 			State.m_Visualizer.m_aFrequencyBands = m_pAudioCapture->m_aFrequencyBands;
 			State.m_Visualizer.m_Active = m_pAudioCapture->m_Active;
-			State.m_Visualizer.m_LastFrequencyChange = m_pAudioCapture->m_LastFrequencyChange;
 		}
 		return true;
 	}
@@ -575,7 +574,6 @@ bool CMediaViewer::GetStateSnapshot(CMediaViewer::CState &State) const
 		std::scoped_lock Lock(m_pAudioCapture->m_Mutex);
 		State.m_Visualizer.m_aFrequencyBands = m_pAudioCapture->m_aFrequencyBands;
 		State.m_Visualizer.m_Active = m_pAudioCapture->m_Active;
-		State.m_Visualizer.m_LastFrequencyChange = m_pAudioCapture->m_LastFrequencyChange;
 	}
 	return true;
 #endif
