@@ -2901,7 +2901,7 @@ void CMenus::RefreshBrowserTab(bool Force)
 			UpdateCommunityCache(true);
 		}
 	}
-	UpdateWarlistCache(); // EClient
+	m_OnlinePlayersCacheDirty = true; // EClient
 }
 
 void CMenus::ForceRefreshLanPage()

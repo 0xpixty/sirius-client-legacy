@@ -907,12 +907,10 @@ private:
 	void PopupConfirmRemoveWarType();
 
 	// Warlist
-	class CWarlistCache
+
+	class CGenericPlayerInfo
 	{
 	public:
-		CWarType *m_pWarType;
-		CWarEntry *m_pEntry;
-
 		char m_aName[MAX_NAME_LENGTH];
 		char m_aClan[MAX_CLAN_LENGTH];
 
@@ -934,11 +932,8 @@ private:
 		int m_CustomSkinColorBody;
 		int m_CustomSkinColorFeet;
 
-		CWarlistCache(CWarEntry *pEntry, const CServerInfo::CClient *pOnlineClient, const CServerInfo *pServer)
+		CGenericPlayerInfo(const CServerInfo::CClient *pOnlineClient, const CServerInfo *pServer)
 		{
-			m_pEntry = pEntry;
-			m_pWarType = pEntry->m_pWarType;
-
 			str_copy(m_aName, pOnlineClient->m_aName);
 			str_copy(m_aClan, pOnlineClient->m_aClan);
 
@@ -967,9 +962,30 @@ private:
 		int Latency() const { return m_Latency; }
 
 		const void *ListItemId() const { return &m_aName; }
-		const void *RemoveButtonId() const { return &m_pWarType; }
 		const void *CommunityTooltipId() const { return &m_IsPlayer; }
 		const void *SkinTooltipId() const { return &m_aSkin; }
+
+		bool operator<(const CGenericPlayerInfo &Other) const
+		{
+			const int Result = str_comp_nocase(m_aName, Other.m_aName);
+			return Result < 0 || (Result == 0 && str_comp_nocase(m_aClan, Other.m_aClan) < 0);
+		}
+	};
+
+	class CWarlistCache : public CGenericPlayerInfo
+	{
+	public:
+		CWarType *m_pWarType;
+		CWarEntry *m_pEntry;
+
+		CWarlistCache(CWarEntry *pEntry, const CServerInfo::CClient *pOnlineClient, const CServerInfo *pServer)
+			: CGenericPlayerInfo(pOnlineClient, pServer)
+		{
+			m_pEntry = pEntry;
+			m_pWarType = pEntry->m_pWarType;
+		}
+
+		const void *RemoveButtonId() const { return &m_pWarType; }
 
 		bool operator<(const CWarlistCache &Other) const
 		{
@@ -980,8 +996,12 @@ private:
 
 	void ServerBrowserUpdate();
 	std::vector<CWarlistCache> m_vWarlistCache;
-	bool m_WarlistCacheDirty = true;
+	bool m_OnlinePlayersCacheDirty = true;
 	const CWarlistCache *m_pRemoveEntry = nullptr;
+	void RenderWarlistPlayers(CUIRect &View, CUIRect &List, CScrollRegion &ScrollRegion);
+
+	std::vector<CGenericPlayerInfo> m_vEntityUsersCache;
+	void RenderEntityClientUsers(CUIRect &View, CUIRect &List, CScrollRegion &ScrollRegion);
 
 	int GetWartypePlayerCount(const CWarType *pWarType) const
 	{
@@ -993,8 +1013,6 @@ private:
 		}
 		return Count;
 	}
-
-	void RenderWarlistPlayers(CUIRect &View, CUIRect &List, CScrollRegion &ScrollRegion);
 
 	void RenderSettingsModuleSearchBar(CScrollRegion &ScrollRegion, CUIRect &MainView, const std::vector<CSettingsModule> &vModules, CLineInputBuffered<32> &SearchInput);
 
@@ -1008,7 +1026,7 @@ public:
 
 	bool DoLine_KeyReader(CUIRect &View, CButtonContainer &ReaderButton, CButtonContainer &ClearButton, const char *pName, const char *pCommand);
 
-	void UpdateWarlistCache();
+	void UpdateOnlinePlayerCache();
 
 	int m_MenusRainbowColor;
 

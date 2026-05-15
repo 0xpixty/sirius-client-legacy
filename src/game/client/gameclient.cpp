@@ -85,13 +85,6 @@
 #include <chrono>
 #include <limits>
 
-// EClient
-union ColorIdentifier
-{
-	int m_Color = 0;
-	unsigned char m_B[4];
-};
-
 using namespace std::chrono_literals;
 
 const char *CGameClient::Version() const { return GAME_VERSION; }
@@ -6098,7 +6091,7 @@ void CGameClient::OnSelfDeath()
 
 void CGameClient::OnServerBrowserRefresh()
 {
-	m_Menus.UpdateWarlistCache();
+	m_Menus.UpdateOnlinePlayerCache();
 }
 
 vec2 CGameClient::GetCursorWorldPos() const

@@ -130,6 +130,12 @@
 #include <vector>
 
 // EClient
+union ColorIdentifier
+{
+	int m_Color = 0;
+	unsigned char m_B[4];
+};
+
 static constexpr int ENTITY_CLIENT_ID_BODY = 101;
 static constexpr int ENTITY_CLIENT_ID_FEET = 99;
 
