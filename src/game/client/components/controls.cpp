@@ -443,7 +443,13 @@ bool CControls::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 		Factor *= GameClient()->m_Camera.m_Zoom;
 
 	if(g_Config.m_ClDecoupleMouseSens && CursorType == IInput::CURSOR_MOUSE)
-		m_aMousePos[g_Config.m_ClDummy] += vec2(x, y) * vec2(g_Config.m_ClMouseSensXIngame / 100.0f, g_Config.m_ClMouseSensYIngame / 100.0f);
+	{
+		vec2 MouseSens = vec2(g_Config.m_ClMouseSensXIngame / 100.0f, g_Config.m_ClMouseSensYIngame / 100.0f);
+		if(GameClient()->m_Snap.m_SpecInfo.m_Active && GameClient()->m_Snap.m_SpecInfo.m_SpectatorId < 0)
+			MouseSens *= GameClient()->m_Camera.m_Zoom;
+
+		m_aMousePos[g_Config.m_ClDummy] += vec2(x, y) * MouseSens;
+	}
 	else
 		m_aMousePos[g_Config.m_ClDummy] += vec2(x, y) * Factor;
 	GameClient()->m_Controls.m_aMouseInputType[g_Config.m_ClDummy] = CControls::EMouseInputType::RELATIVE;
