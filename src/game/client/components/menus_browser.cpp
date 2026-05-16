@@ -1881,12 +1881,19 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 {
 	UpdateCommunityCache(false);
 
+	static bool s_UpdatedWhileRefreshing = false;
 	if(m_OnlinePlayersCacheDirty)
 	{
 		if(!ServerBrowser()->IsRefreshing() && !ServerBrowser()->IsGettingServerlist())
 		{
 			UpdateOnlinePlayerCache();
 			m_OnlinePlayersCacheDirty = false;
+			s_UpdatedWhileRefreshing = false;
+		}
+		else if(!s_UpdatedWhileRefreshing)
+		{
+			UpdateOnlinePlayerCache();
+			s_UpdatedWhileRefreshing = true;
 		}
 	}
 
