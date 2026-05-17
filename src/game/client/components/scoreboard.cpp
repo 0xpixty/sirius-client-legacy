@@ -810,23 +810,42 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 					TextRender()->TextEx(&Cursor, "✓");
 				}
 
-				if(pInfo->m_ClientId >= 0 && GameClient()->m_WarList.m_WarPlayers[pInfo->m_ClientId].m_IsMuted)
+				if(pInfo->m_ClientId >= 0)
 				{
-					ColorRGBA Color = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMutedColor));
-
-					Graphics()->BlendNormal();
-					Graphics()->TextureSet(g_pData->m_aImages[IMAGE_MUTED_ICON].m_Id);
-					Graphics()->QuadsBegin();
-					Graphics()->SetColor(Color);
-
 					float MuteSize = 34.0f * TeeSizeMod;
+					bool Muted = GameClient()->m_WarList.m_WarPlayers[pInfo->m_ClientId].m_IsMuted;
+					if(Muted)
+					{
+						ColorRGBA Color = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMutedColor));
 
-					float x = NameOffset + Cursor.BoundingBox().m_W + FontSize / 2.0f;
-					float y = Row.y + (Row.h - MuteSize) / 2.0f;
+						Graphics()->BlendNormal();
+						Graphics()->TextureSet(g_pData->m_aImages[IMAGE_MUTED_ICON].m_Id);
+						Graphics()->QuadsBegin();
+						Graphics()->SetColor(Color);
 
-					IGraphics::CQuadItem QuadItem(x, y, MuteSize, MuteSize);
-					Graphics()->QuadsDrawTL(&QuadItem, 2);
-					Graphics()->QuadsEnd();
+						float x = NameOffset + Cursor.BoundingBox().m_W + FontSize / 2.0f;
+						float y = Row.y + (Row.h - MuteSize) / 2.0f;
+
+						IGraphics::CQuadItem QuadItem(x, y, MuteSize, MuteSize);
+						Graphics()->QuadsDrawTL(&QuadItem, 2);
+						Graphics()->QuadsEnd();
+					}
+					if(GameClient()->m_aClients[pInfo->m_ClientId].m_IsEntityClientUser && g_Config.m_ClClientUsersScoreboard)
+					{
+						Graphics()->BlendNormal();
+						Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GENERIC_GHOST].m_Id);
+						Graphics()->QuadsBegin();
+						Graphics()->SetColor(ColorRGBA(1, 1, 1));
+
+						float x = NameOffset + Cursor.BoundingBox().m_W + FontSize / 2.0f;
+						if(Muted)
+							x += MuteSize + FontSize / 2.0f;
+						float y = Row.y + (Row.h - MuteSize) / 2.0f;
+
+						IGraphics::CQuadItem QuadItem(x, y, MuteSize, MuteSize);
+						Graphics()->QuadsDrawTL(&QuadItem, 2);
+						Graphics()->QuadsEnd();
+					}
 				}
 			}
 

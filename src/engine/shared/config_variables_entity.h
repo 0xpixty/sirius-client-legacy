@@ -451,6 +451,7 @@ MACRO_CONFIG_INT(ClMouseSensYUi, ec_mouse_sens_y_ui, -1, 1, 100000, CFGFLAG_CLIE
 // Client Indicator
 MACRO_CONFIG_INT(ClClientUsersBrowser, ec_client_users_browser, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Whether to show a list of people using EClient in the server browser")
 MACRO_CONFIG_INT(ClClientUsersOnlineInfo, ec_client_users_online_info, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "list entity client users in the 'onlineinfo' command")
+MACRO_CONFIG_INT(ClClientUsersScoreboard, ec_client_users_scoreboard, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show entity client users in the scoreboard")
 
 // Custom variables from my server for the editor
 // You can use these if you get my server from https://github.com/FoxNet-DDNet/FoxNet

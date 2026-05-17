@@ -117,6 +117,7 @@ public:
 private:
 	float m_ScrollY;
 	float m_ContentH;
+	bool m_RequestedScrollSmooth;
 	float m_RequestScrollY; // [0, ContentHeight]
 	EScrollRelative m_ScrollDirection;
 	float m_ScrollSpeedMultiplier;
@@ -147,7 +148,7 @@ public:
 	void Begin(CUIRect *pClipRect, const CScrollRegionParams *pParams = nullptr);
 	void End();
 	bool AddRect(const CUIRect &Rect, bool ShouldScrollHere = false); // returns true if the added rect is visible (not clipped)
-	void ScrollHere(EScrollOption Option = SCROLLHERE_KEEP_IN_VIEW);
+	void ScrollHere(EScrollOption Option = SCROLLHERE_KEEP_IN_VIEW, bool Smooth = false);
 	void ScrollRelative(EScrollRelative Direction, float SpeedMultiplier = 1.0f);
 	void ScrollRelativeDirect(float ScrollAmount);
 	const CUIRect *ClipRect() const { return &m_ClipRect; }

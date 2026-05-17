@@ -130,7 +130,7 @@ void CScrollRegion::End()
 		m_RequestScrollY = -1.0f;
 
 		const float SmoothTime = g_Config.m_UiSmoothScrollTime / 1000.0f;
-		if(SmoothTime > 0.0f && absolute(m_ScrollY - TargetScrollY) >= 0.5f)
+		if(m_RequestedScrollSmooth && SmoothTime > 0.0f && absolute(m_ScrollY - TargetScrollY) >= 0.5f)
 		{
 			m_AnimTimeMax = SmoothTime;
 			m_AnimTime = m_AnimTimeMax;
@@ -142,6 +142,7 @@ void CScrollRegion::End()
 			m_AnimTargetScrollY = TargetScrollY;
 			m_AnimTime = 0.0f;
 		}
+		m_RequestedScrollSmooth = false;
 	}
 
 	m_AnimTargetScrollY = std::clamp(m_AnimTargetScrollY, 0.0f, MaxScroll);
@@ -224,11 +225,12 @@ bool CScrollRegion::AddRect(const CUIRect &Rect, bool ShouldScrollHere)
 	return !RectClipped(Rect);
 }
 
-void CScrollRegion::ScrollHere(EScrollOption Option)
+void CScrollRegion::ScrollHere(EScrollOption Option, bool Smooth)
 {
 	const float MinHeight = minimum(m_ClipRect.h, m_LastAddedRect.h);
 	const float TopScroll = m_LastAddedRect.y - (m_ClipRect.y + m_ContentScrollOff.y);
 
+	m_RequestedScrollSmooth = Smooth;
 	switch(Option)
 	{
 	case SCROLLHERE_TOP:

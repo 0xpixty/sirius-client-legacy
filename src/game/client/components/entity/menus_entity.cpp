@@ -185,7 +185,7 @@ void CMenus::RenderSettingsModuleSearchBar(CScrollRegion &ScrollRegion, CUIRect 
 		{
 			Ui()->SetActiveItem(&SearchInput);
 			SearchInput.SelectAll();
-			ScrollRegion.ScrollHere(CScrollRegion::EScrollOption::SCROLLHERE_TOP);
+			ScrollRegion.ScrollHere(CScrollRegion::EScrollOption::SCROLLHERE_TOP, true);
 		}
 		SearchInput.SetEmptyText(Localize("Search"));
 		Ui()->DoClearableEditBox(&SearchInput, &EditBox, EditBoxFontSize);
