@@ -303,7 +303,7 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 
 	float Ticks;
 	float TicksHead = Client()->GameTick(g_Config.m_ClDummy);
-	if(Type == LASERTYPE_DOOR)
+	if(Type == LASERTYPE_DOOR && !g_Config.m_ClRevertDoorDesign) // EClient
 	{
 		Ticks = 1.0f;
 	}
@@ -382,7 +382,7 @@ void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA In
 	}
 
 	// render head
-	if(Type == LASERTYPE_DOOR)
+	if(Type == LASERTYPE_DOOR && !g_Config.m_ClRevertDoorDesign) // EClient
 	{
 		Graphics()->TextureClear();
 		Graphics()->QuadsSetRotation(0);
@@ -869,7 +869,7 @@ void CItems::RenderCosmeticLaser(const CNetObj_CosmeticLaser *pPrev, const CNetO
 	}
 
 	auto RenderHead = [&](vec2 Pos) {
-		if(Type == LASERTYPE_DOOR)
+		if(Type == LASERTYPE_DOOR && !g_Config.m_ClRevertDoorDesign) // EClient
 		{
 			Graphics()->TextureClear();
 			Graphics()->QuadsSetRotation(0);

@@ -406,6 +406,7 @@ MACRO_CONFIG_INT(ClScoreboardOutlineTeams, ec_scoreboard_outline_teams, 0, 0, 1,
 
 // Team Colors
 MACRO_CONFIG_INT(ClRevertTeamColors, ec_revert_team_colors, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "revert team colors (github.com/ddnet/ddnet/pull/7129)") // https://github.com/ddnet/ddnet/pull/7129
+MACRO_CONFIG_INT(ClRevertDoorDesign, ec_revert_door_design, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "revert door design (github.com/ddnet/ddnet/pull/9901)") // https://github.com/ddnet/ddnet/pull/9901
 
 // Hookline
 // MACRO_CONFIG_INT(EcRevertHookLine, ec_revert_hook_line, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Revert hook line to default behavior | 1=Accurate to Tiles | 2=Accurate to Tees")
