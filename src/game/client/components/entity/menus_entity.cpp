@@ -2548,8 +2548,9 @@ void CMenus::RenderSettingsEClient(CUIRect MainView)
 {
 	static CScrollRegion s_ScrollRegion;
 	CScrollRegionParams ScrollParams;
-	ScrollParams.m_ScrollUnit = Ui()->IsPopupOpen() ? 0.0f : ScrollSpeed;
-	ScrollParams.m_Flags = CScrollRegionParams::FLAG_CONTENT_STATIC_WIDTH;
+	ScrollParams.m_ScrollUnit = 60.0f;
+	ScrollParams.m_ForceShowScrollbar = true;
+	ScrollParams.m_ScrollbarMargin = 5.0f;
 	s_ScrollRegion.Begin(&MainView, &ScrollParams);
 
 	std::vector<CSettingsModule> vModules;
@@ -3071,8 +3072,9 @@ void CMenus::RenderSettingsVisual(CUIRect MainView)
 {
 	static CScrollRegion s_ScrollRegion;
 	CScrollRegionParams ScrollParams;
-	ScrollParams.m_ScrollUnit = Ui()->IsPopupOpen() ? 0.0f : ScrollSpeed;
-	ScrollParams.m_Flags = CScrollRegionParams::FLAG_CONTENT_STATIC_WIDTH;
+	ScrollParams.m_ScrollUnit = 60.0f;
+	ScrollParams.m_ForceShowScrollbar = true;
+	ScrollParams.m_ScrollbarMargin = 5.0f;
 	s_ScrollRegion.Begin(&MainView, &ScrollParams);
 
 	std::vector<CSettingsModule> vModules;
@@ -3110,13 +3112,9 @@ void CMenus::RenderSettingsVisual(CUIRect MainView)
 			const int EffectSelectedNew = Ui()->DoDropDown(&EffectDropDownRect, EffectSelectedOld, s_EffectDropDownNames.data(), s_EffectDropDownNames.size(), s_EffectDropDownState);
 			Ui()->UpdatePopupMenuOffset(&s_EffectDropDownState.m_SelectionPopupContext, EffectDropDownRect.x, EffectDropDownRect.y);
 
-			if(s_ScrollRegion.ClipRect())
+			if(s_ScrollRegion.RectClipped(EffectDropDownRect))
 			{
-				const float PosY = EffectDropDownRect.y + 20.0f;
-				if(PosY < s_ScrollRegion.ClipRect()->y || PosY > (s_ScrollRegion.ClipRect()->y + s_ScrollRegion.ClipRect()->h))
-				{
-					Ui()->ClosePopupMenu(&s_EffectDropDownState.m_SelectionPopupContext);
-				}
+				Ui()->ClosePopupMenu(&s_EffectDropDownState.m_SelectionPopupContext);
 			}
 
 			if(EffectSelectedOld != EffectSelectedNew)
@@ -3169,13 +3167,9 @@ void CMenus::RenderSettingsVisual(CUIRect MainView)
 			const int RainbowSelectedNew = Ui()->DoDropDown(&RainbowDropDownRect, RainbowSelectedOld, s_RainbowDropDownNames.data(), s_RainbowDropDownNames.size(), s_RainbowDropDownState);
 			Ui()->UpdatePopupMenuOffset(&s_RainbowDropDownState.m_SelectionPopupContext, RainbowDropDownRect.x, RainbowDropDownRect.y);
 
-			if(s_ScrollRegion.ClipRect())
+			if(s_ScrollRegion.RectClipped(RainbowDropDownRect))
 			{
-				const float PosY = RainbowDropDownRect.y + 20.0f;
-				if(PosY < s_ScrollRegion.ClipRect()->y || PosY > (s_ScrollRegion.ClipRect()->y + s_ScrollRegion.ClipRect()->h))
-				{
-					Ui()->ClosePopupMenu(&s_RainbowDropDownState.m_SelectionPopupContext);
-				}
+				Ui()->ClosePopupMenu(&s_RainbowDropDownState.m_SelectionPopupContext);
 			}
 
 			if(RainbowSelectedOld != RainbowSelectedNew)
@@ -3227,13 +3221,9 @@ void CMenus::RenderSettingsVisual(CUIRect MainView)
 			const int TrailSelectedNew = Ui()->DoDropDown(&TrailDropDownRect, TrailSelectedOld, vTrailDropDownNames.data(), vTrailDropDownNames.size(), s_TrailDropDownState);
 			Ui()->UpdatePopupMenuOffset(&s_TrailDropDownState.m_SelectionPopupContext, TrailDropDownRect.x, TrailDropDownRect.y);
 
-			if(s_ScrollRegion.ClipRect())
+			if(s_ScrollRegion.RectClipped(TrailDropDownRect))
 			{
-				const float PosY = TrailDropDownRect.y + 20.0f;
-				if(PosY < s_ScrollRegion.ClipRect()->y || PosY > (s_ScrollRegion.ClipRect()->y + s_ScrollRegion.ClipRect()->h))
-				{
-					Ui()->ClosePopupMenu(&s_TrailDropDownState.m_SelectionPopupContext);
-				}
+				Ui()->ClosePopupMenu(&s_TrailDropDownState.m_SelectionPopupContext);
 			}
 
 			if(TrailSelectedOld != TrailSelectedNew)
@@ -3731,13 +3721,9 @@ void CMenus::RenderSettingsVisual(CUIRect MainView)
 					const int FontSelectedNew = Ui()->DoDropDown(&FontDropDownRect, FontSelectedOld, s_FontDropDownNames.data(), s_FontDropDownNames.size(), s_FontDropDownState);
 					Ui()->UpdatePopupMenuOffset(&s_FontDropDownState.m_SelectionPopupContext, FontDropDownRect.x, FontDropDownRect.y);
 
-					if(s_ScrollRegion.ClipRect())
+					if(s_ScrollRegion.RectClipped(FontDropDownRect))
 					{
-						const float PosY = FontDropDownRect.y + 20.0f;
-						if(PosY < s_ScrollRegion.ClipRect()->y || PosY > (s_ScrollRegion.ClipRect()->y + s_ScrollRegion.ClipRect()->h))
-						{
-							Ui()->ClosePopupMenu(&s_FontDropDownState.m_SelectionPopupContext);
-						}
+						Ui()->ClosePopupMenu(&s_FontDropDownState.m_SelectionPopupContext);
 					}
 
 					if(FontSelectedOld != FontSelectedNew)

@@ -158,6 +158,7 @@ float CHud::GameTimerWidth(float Size, int Time)
 	float w = Time >= 3600 * 24 * 100 ? s_TextWidth000D : (Time >= 3600 * 24 * 10 ? s_TextWidth00D : (Time >= 3600 * 24 ? s_TextWidth0D : (Time >= 3600 ? s_TextWidthH : s_TextWidthM)));
 	return w;
 }
+
 int CHud::GameTimerTime()
 {
 	int Time = 0;
@@ -178,6 +179,7 @@ int CHud::GameTimerTime()
 		else
 		{
 			Time = (Client()->GameTick(g_Config.m_ClDummy) - GameClient()->m_Snap.m_pGameInfoObj->m_RoundStartTick) / Client()->GameTickSpeed();
+		}
 	}
 	return Time;
 }

@@ -79,7 +79,7 @@ bool CScrollRegion::AddRect(const CUIRect &Rect, bool ShouldScrollHere)
 	return !RectClipped(Rect);
 }
 
-void CScrollRegion::ScrollHere(EScrollOption Option)
+void CScrollRegion::ScrollHere(EScrollOption Option, bool Smooth)
 {
 	const float LastAddedPos = m_Params.m_ScrollHorizontal ? m_LastAddedRect.x : m_LastAddedRect.y;
 	const float LastAddedSize = m_Params.m_ScrollHorizontal ? m_LastAddedRect.w : m_LastAddedRect.h;
@@ -105,6 +105,7 @@ void CScrollRegion::ScrollHere(EScrollOption Option)
 			m_RequestScrollPos = TopScroll - (ContentAreaSize() - MinHeight);
 		break;
 	}
+	m_RequestedScrollSmooth = Smooth; // EClient
 }
 
 void CScrollRegion::ScrollRelative(EScrollRelative Direction, float SpeedMultiplier)
@@ -281,16 +282,14 @@ void CScrollRegion::AdvanceAnimation()
 		m_RequestScrollPos = -1.0f;
 
 		const float SmoothTime = g_Config.m_UiSmoothScrollTime / 1000.0f;
-		if(m_RequestedScrollSmooth && SmoothTime > 0.0f && absolute(m_ScrollY - m_AnimTargetScrollPos) >= 0.5f)
+		if(m_RequestedScrollSmooth && SmoothTime > 0.0f && absolute(m_ScrollPos - m_AnimTargetScrollPos) >= 0.5f)
 		{
 			m_AnimTimeMax = SmoothTime;
 			m_AnimTime = m_AnimTimeMax;
 			m_AnimInitScrollPos = m_ScrollPos;
-			m_AnimTargetScrollPos = m_AnimTargetScrollPos;
 		}
 		else
 		{
-			m_AnimTargetScrollPos = m_AnimTargetScrollPos;
 			m_AnimTime = 0.0f;
 		}
 		m_RequestedScrollSmooth = false;
