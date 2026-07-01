@@ -10,3 +10,6 @@ SET_CONFIG_DOMAIN(ConfigDomain::DDNET)
 
 SET_CONFIG_DOMAIN(ConfigDomain::ENTITY)
 #include "config_variables_entity.h"
+
+SET_CONFIG_DOMAIN(ConfigDomain::SIRIUS)
+#include "config_variables_sirius.h"

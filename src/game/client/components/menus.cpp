@@ -52,6 +52,9 @@ ColorRGBA CMenus::ms_ColorTabbarActiveOutgame;
 ColorRGBA CMenus::ms_ColorTabbarHoverOutgame;
 ColorRGBA CMenus::ms_ColorTabbarInactive;
 ColorRGBA CMenus::ms_ColorTabbarActive = ColorRGBA(0, 0, 0, 0.5f);
+ColorRGBA CMenus::ms_ColorMenuBorder = ColorRGBA(0.243f, 0.243f, 0.243f, 0.95f);
+ColorRGBA CMenus::ms_ColorSidebarBackground = ColorRGBA(0.133f, 0.129f, 0.129f, 0.95f);
+ColorRGBA CMenus::ms_ColorRightViewBackground = ColorRGBA(0.447f, 0.408f, 0.408f, 0.95f);
 ColorRGBA CMenus::ms_ColorTabbarHover;
 ColorRGBA CMenus::ms_ColorTabbarInactiveIngame;
 ColorRGBA CMenus::ms_ColorTabbarActiveIngame;
@@ -80,6 +83,14 @@ CMenus::CMenus()
 	m_Dummy = false;
 
 	for(SUIAnimator &Animator : m_aAnimatorsSettingsTab)
+	{
+		Animator.m_YOffset = -2.5f;
+		Animator.m_HOffset = 5.0f;
+		Animator.m_WOffset = 5.0f;
+		Animator.m_RepositionLabel = true;
+	}
+
+	for(SUIAnimator &Animator : m_aAnimatorsSubTab)
 	{
 		Animator.m_YOffset = -2.5f;
 		Animator.m_HOffset = 5.0f;
@@ -198,6 +209,100 @@ int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText,
 		Ui()->DoLabel(&Text, pText, Size, TEXTALIGN_MC);
 
 	return Ui()->DoButtonLogic(pButtonContainer, Checked, pRect, Flags);
+}
+
+int CMenus::DoButton_MenuTabSirius(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator, float EdgeRounding)
+{
+        const bool MouseInside = Ui()->HotItem() == pButtonContainer;
+        CUIRect Rect = *pRect;
+
+        // --- 1. АНИМАЦИЯ НАВЕДЕНИЯ/АКТИВНОСТИ ---
+        if(pAnimator != nullptr)
+        {
+               auto Time = time_get_nanoseconds();
+               if(pAnimator->m_Time + 100ms < Time)
+               {
+                      pAnimator->m_Value = pAnimator->m_Active ? 1 : 0;
+                      pAnimator->m_Time = Time;
+               }
+
+               pAnimator->m_Active = Checked || MouseInside;
+
+               if(pAnimator->m_Active)
+                      pAnimator->m_Value = std::clamp<float>(pAnimator->m_Value + (Time - pAnimator->m_Time).count() / (double)std::chrono::nanoseconds(100ms).count(), 0, 1);
+               else
+                      pAnimator->m_Value = std::clamp<float>(pAnimator->m_Value - (Time - pAnimator->m_Time).count() / (double)std::chrono::nanoseconds(100ms).count(), 0, 1);
+
+               Rect.w += pAnimator->m_Value * pAnimator->m_WOffset;
+               Rect.h += pAnimator->m_Value * pAnimator->m_HOffset;
+               Rect.x += pAnimator->m_Value * pAnimator->m_XOffset;
+               Rect.y += pAnimator->m_Value * pAnimator->m_YOffset;
+
+               pAnimator->m_Time = Time;
+        }
+
+        // --- 2. ОПРЕДЕЛЕНИЕ СТИЛЕЙ СИРИУСА ---
+        ColorRGBA BgColor, BorderColor, TextColor;
+        ColorRGBA ColorDark = ColorRGBA(0.133f, 0.129f, 0.129f, 1.0f);
+        ColorRGBA ColorLight = ColorRGBA(0.361f, 0.341f, 0.341f, 1.0f);
+
+        if(Checked)
+        {
+               // Активное состояние: инверсия + маркер
+               BgColor = ColorLight;
+               BorderColor = ColorDark;
+               TextColor = ColorDark;
+        }
+        else
+        {
+               // Неактивное состояние (при ховере можно сделать чуть светлее обводку)
+               BgColor = ColorDark;
+               BorderColor = ColorLight;
+               TextColor = ColorLight;
+        }
+
+        // --- 3. ОТРИСОВКА КНОПКИ (ФОН + ОБВОДКА) ---
+        Rect.Draw(BorderColor, Corners, EdgeRounding);
+
+        CUIRect InnerBg;
+        Rect.Margin(1.0f, &InnerBg);
+        InnerBg.Draw(BgColor, Corners, EdgeRounding - 1.0f);
+
+        // --- 4. МАРКЕР АКТИВНОСТИ СЛЕВА ---
+        if(Checked)
+        {
+               CUIRect SelectionMarker;
+               InnerBg.VSplitLeft(3.0f, &SelectionMarker, &InnerBg);
+               SelectionMarker.VMargin(2.0f, &SelectionMarker);
+               SelectionMarker.HMargin(4.0f, &SelectionMarker);
+               SelectionMarker.Draw(ColorDark, IGraphics::CORNER_R, 2.0f);
+        }
+
+        // --- 5. КОРРЕКЦИЯ ТЕКСТА ПОД АНИМАЦИЮ ---
+        if(pAnimator != nullptr)
+        {
+               if(pAnimator->m_RepositionLabel)
+               {
+                      Rect.x += Rect.w - pRect->w + Rect.x - pRect->x;
+                      Rect.y += Rect.h - pRect->h + Rect.y - pRect->y;
+               }
+               if(!pAnimator->m_ScaleLabel)
+               {
+                      Rect.w = pRect->w;
+                      Rect.h = pRect->h;
+               }
+        }
+
+        // --- 6. ОТРИСОВКА ТЕКСТА КНОПКИ ---
+        CUIRect Label;
+        Rect.HMargin(4.0f, &Label);
+
+        // Принудительно задаем цвет текста
+        TextRender()->TextColor(TextColor);
+        Ui()->DoLabel(&Label, pText, Label.h * CUi::ms_FontmodHeight, TEXTALIGN_MC);
+        TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f)); // Сбрасываем в дефолтный белый
+
+        return Ui()->DoButtonLogic(pButtonContainer, Checked, pRect, BUTTONFLAG_LEFT);
 }
 
 int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding, const CCommunityIcon *pCommunityIcon)
@@ -637,41 +742,41 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 
 	Box.VSplitRight(10.0f, &Box, nullptr);
 	Box.VSplitRight(33.0f, &Box, &Button);
-	static CButtonContainer s_EditorButton;
-	if(DoButton_MenuTab(&s_EditorButton, FontIcon::PEN_TO_SQUARE, 0, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_EDITOR]))
+	static CButtonContainer s_SiriusButton;
+	if(DoButton_MenuTab(&s_SiriusButton, FontIcon::SIRIUS, 0, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_EDITOR]))
 	{
-		g_Config.m_ClEditor = 1;
+		NewPage = PAGE_SIRIUS;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_EditorButton, &Button, Localize("Editor"));
+	GameClient()->m_Tooltips.DoToolTip(&s_SiriusButton, &Button, Localize("Sirius Menu"));
 
 	if(ClientState == IClient::STATE_OFFLINE)
 	{
 		Box.VSplitRight(10.0f, &Box, nullptr);
 		Box.VSplitRight(33.0f, &Box, &Button);
-		static CButtonContainer s_DemoButton;
-		if(DoButton_MenuTab(&s_DemoButton, FontIcon::CLAPPERBOARD, ActivePage == PAGE_DEMOS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_DEMOBUTTON]))
-		{
-			NewPage = PAGE_DEMOS;
-		}
-		GameClient()->m_Tooltips.DoToolTip(&s_DemoButton, &Button, Localize("Demos"));
+		// static CButtonContainer s_DemoButton;
+		// if(DoButton_MenuTab(&s_DemoButton, FontIcon::CLAPPERBOARD, ActivePage == PAGE_DEMOS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_DEMOBUTTON]))
+		// {
+		// 	NewPage = PAGE_DEMOS;
+		// }
+		// GameClient()->m_Tooltips.DoToolTip(&s_DemoButton, &Button, Localize("Demos"));
 
 		// EClient
 		Box.VSplitRight(10.0f, &Box, nullptr);
 		Box.VSplitRight(33.0f, &Box, &Button);
-		static CButtonContainer s_EClientButton;
-		ColorRGBA Inactive = ms_ColorTabbarInactive;
-		ColorRGBA Active = ms_ColorTabbarActive;
-		if(g_Config.m_EcUnreadNews)
-		{
-			Inactive = ColorRGBA(0.2f, 0.7f, 0.5, 0.4f);
-			Active = ColorRGBA(0.3f, 0.8f, 0.6, 0.5f);
-		}
-		if(DoButton_MenuTab(&s_EClientButton, FontIcon::INFO, ActivePage == PAGE_ECLIENTNEWS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_ECLIENT], &Inactive, &Active))
-		{
-			NewPage = PAGE_ECLIENTNEWS;
-			g_Config.m_EcUnreadNews = false;
-		}
-		GameClient()->m_Tooltips.DoToolTip(&s_EClientButton, &Button, Localize("News"));
+		// static CButtonContainer s_EClientButton;
+		// ColorRGBA Inactive = ms_ColorTabbarInactive;
+		// ColorRGBA Active = ms_ColorTabbarActive;
+		// if(g_Config.m_EcUnreadNews)
+		// {
+		// 	Inactive = ColorRGBA(0.2f, 0.7f, 0.5, 0.4f);
+		// 	Active = ColorRGBA(0.3f, 0.8f, 0.6, 0.5f);
+		// }
+		// if(DoButton_MenuTab(&s_EClientButton, FontIcon::INFO, ActivePage == PAGE_ECLIENTNEWS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_ECLIENT], &Inactive, &Active))
+		// {
+		// 	NewPage = PAGE_ECLIENTNEWS;
+		// 	g_Config.m_EcUnreadNews = false;
+		// }
+		// GameClient()->m_Tooltips.DoToolTip(&s_EClientButton, &Button, Localize("News"));
 
 		Box.VSplitRight(10.0f, &Box, nullptr);
 		Box.VSplitLeft(33.0f, &Button, &Box);
@@ -1001,6 +1106,8 @@ void CMenus::RenderNews(CUIRect MainView)
 void CMenus::OnInterfacesInit(CGameClient *pClient)
 {
 	CComponentInterfaces::OnInterfacesInit(pClient);
+	m_MenusIngameSirius.OnInterfacesInit(pClient);
+	m_MenusIngameSirius.SetMenu(this);
 	m_MenusIngameTouchControls.OnInterfacesInit(pClient);
 	m_MenusSettingsControls.OnInterfacesInit(pClient);
 	m_MenusStart.OnInterfacesInit(pClient);
@@ -1289,6 +1396,10 @@ void CMenus::Render()
 			{
 				RenderSettings(MainView);
 			}
+			else if(m_MenuPage == PAGE_SIRIUS) // ClSirius
+			{
+				RenderSirius(MainView);
+			}
 			else if(m_MenuPage == PAGE_ECLIENTNEWS)
 			{
 				RenderEClientNewsPage(MainView);
@@ -1309,13 +1420,22 @@ void CMenus::Render()
 		}
 		else
 		{
+			const bool UseSiriusPauseMenu = g_Config.m_ClSiriusPauseMenu && m_GamePage == PAGE_GAME;
 			CUIRect TabBar, MainView;
-			Screen.HSplitTop(24.0f, &TabBar, &MainView);
+			if(UseSiriusPauseMenu)
+			{
+				MainView = Screen;
+			}
+			else
+			{
+				Screen.HSplitTop(24.0f, &TabBar, &MainView);
+			}
 
 			if(m_GamePage == PAGE_GAME)
 			{
 				RenderGame(MainView);
-				RenderIngameHint();
+				if(!UseSiriusPauseMenu)
+					RenderIngameHint();
 			}
 			else if(m_GamePage == PAGE_PLAYERS)
 			{
@@ -1345,6 +1465,10 @@ void CMenus::Render()
 			{
 				RenderSettings(MainView);
 			}
+			else if(m_GamePage == PAGE_SIRIUS) // ClSirius
+			{
+				RenderSirius(MainView);
+			}
 			else if(m_GamePage == PAGE_ECLIENTNEWS)
 			{
 				RenderEClientNewsPage(MainView);
@@ -1358,7 +1482,8 @@ void CMenus::Render()
 				dbg_assert_failed("Invalid m_GamePage: %d", m_GamePage);
 			}
 
-			RenderMenubar(TabBar, ClientState);
+			if(!UseSiriusPauseMenu)
+				RenderMenubar(TabBar, ClientState);
 		}
 		break;
 
@@ -2564,6 +2689,10 @@ void CMenus::SetActive(bool Active)
 		Ui()->SetActiveItem(nullptr);
 	}
 	m_MenuActive = Active;
+	if(m_MenuActive && Client()->State() == IClient::STATE_ONLINE && g_Config.m_ClSiriusPauseMenu)
+	{
+		m_GamePage = PAGE_GAME;
+	}
 	if(!m_MenuActive)
 	{
 		if(m_NeedSendinfo)

@@ -2265,6 +2265,7 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   config_includes.h
   config_variables.h
   config_variables_entity.h
+  config_variables_sirius.h
   console.cpp
   console.h
   csv.cpp
@@ -2660,6 +2661,8 @@ if(CLIENT)
     components/menus_browser.cpp
     components/menus_demo.cpp
     components/menus_ingame.cpp
+    components/menus_ingame_sirius.cpp
+    components/menus_ingame_sirius.h
     components/menus_ingame_touch_controls.cpp
     components/menus_ingame_touch_controls.h
     components/menus_settings.cpp
@@ -2946,7 +2949,9 @@ if(CLIENT)
   else()
     set(CLIENT_ICON)
     set(CLIENT_VERSIONINFO)
-    set(CLIENT_MANIFEST)
+    set(CLIENT_MANIFEST
+            src/game/client/components/menus_ingame_sirius.cpp
+            src/game/client/components/menus_ingame_sirius.h)
   endif()
 
   # Target
@@ -3328,7 +3333,8 @@ if(TOOLS)
       endif()
       set(EXCLUDE_FROM_ALL)
       if(DEV)
-        set(EXCLUDE_FROM_ALL EXCLUDE_FROM_ALL)
+        set(EXCLUDE_FROM_ALL EXCLUDE_FROM_ALL
+                src/engine/shared/config_variables_sirius.h)
       endif()
       add_executable(${TOOL} ${EXCLUDE_FROM_ALL}
         ${TOOL_DEPS}

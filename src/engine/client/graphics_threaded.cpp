@@ -1311,6 +1311,46 @@ void CGraphics_Threaded::DrawRect(float x, float y, float w, float h, ColorRGBA 
 	QuadsEnd();
 }
 
+void CGraphics_Threaded::DrawRectGlow(float x, float y, float w, float h, ColorRGBA Color, float GlowSize, int Corners, float Rounding, int Steps)
+{
+	if(Color.a <= 0.0f || GlowSize <= 0.0f || Steps <= 0)
+		return;
+
+	const int SoftSteps = maximum(Steps * 2, 2);
+
+	TextureClear();
+	BlendAdditive();
+
+	QuadsBegin();
+	for(int i = SoftSteps; i >= 1; --i)
+	{
+		const float t = i / (float)SoftSteps;
+		const float Expand = GlowSize * t;
+		const float Alpha = Color.a * 0.03f * (1.0f - t * t * 0.55f);
+		SetColor(Color.WithAlpha(Alpha));
+		DrawRectExt(x - Expand, y - Expand, w + Expand * 2.0f, h + Expand * 2.0f, Rounding + Expand, Corners);
+	}
+	QuadsEnd();
+
+	const float OutlineAlphaStep = Color.a * 0.055f / Steps;
+	for(int i = 1; i <= Steps; ++i)
+	{
+		const float Expand = GlowSize * (i / (float)Steps);
+		DrawRectOutline(
+			x - Expand,
+			y - Expand,
+			w + Expand * 2.0f,
+			h + Expand * 2.0f,
+			Color.WithAlpha(OutlineAlphaStep * (Steps - i + 1)),
+			Corners,
+			IGraphics::SIDE_ALL,
+			Rounding + Expand);
+	}
+
+	BlendNormal();
+	SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+}
+
 void CGraphics_Threaded::DrawRectOutline(float x, float y, float w, float h, ColorRGBA Color, int Corners, int Sides, float Rounding)
 {
 	const int NumSegments = 8;

@@ -484,6 +484,7 @@ public:
 	virtual void DrawRectExt4(float x, float y, float w, float h, ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, float r, int Corners) = 0;
 	virtual int CreateRectQuadContainer(float x, float y, float w, float h, float r, int Corners) = 0;
 	virtual void DrawRect(float x, float y, float w, float h, ColorRGBA Color, int Corners, float Rounding) = 0;
+	virtual void DrawRectGlow(float x, float y, float w, float h, ColorRGBA Color, float GlowSize, int Corners, float Rounding, int Steps = 4) = 0;
 	virtual void DrawRectOutline(float x, float y, float w, float h, ColorRGBA Color, int Corners, int Sides, float Rounding) = 0;
 	virtual void DrawRect4(float x, float y, float w, float h, ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, int Corners, float Rounding) = 0;
 	virtual void DrawCircle(float CenterX, float CenterY, float Radius, int Segments) = 0;

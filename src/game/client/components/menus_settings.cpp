@@ -1336,6 +1336,35 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 	}
 }
 
+void CMenus::RenderInformationView(CUIRect MainView)
+{
+
+}
+
+void CMenus::RenderVisualView(CUIRect MainView)
+{
+
+}
+void CMenus::RenderHudView(CUIRect MainView)
+{
+
+}
+void CMenus::RenderAnimationsView(CUIRect MainView)
+{
+
+}
+
+void CMenus::RenderGameplayView(CUIRect MainView)
+{
+
+}
+
+void CMenus::RenderInstrumentsView(CUIRect MainView)
+{
+
+}
+
+
 void CMenus::RenderLanguageSettings(CUIRect MainView)
 {
 	const float CreditsFontSize = 14.0f;
@@ -1423,6 +1452,138 @@ bool CMenus::RenderLanguageSelection(CUIRect MainView)
 	}
 
 	return s_ListBox.WasItemActivated();
+}
+
+void CMenus::RenderSirius(CUIRect MainView)
+{
+	static float s_SubTabAnimationProgress = 0.0f;
+	const float ButtonHeight = 26.0f;
+	const float ButtonSpacing = 6.0f;
+	bool IsVisualActive = (g_Config.m_UiSidebarPage == SIDEBAR_VISUAL || (g_Config.m_UiSidebarPage == -1 && g_Config.m_UiSidebarSubPage != SUB_NONE));
+	float TargetProgress = IsVisualActive ? 1.0f : 0.0f;
+	s_SubTabAnimationProgress = s_SubTabAnimationProgress + (TargetProgress - s_SubTabAnimationProgress) * 0.15f;
+
+        // 1. Inner border
+        MainView.Draw(ms_ColorMenuBorder, IGraphics::CORNER_ALL, 10.0f);
+
+        CUIRect InnerView;
+        MainView.Margin(12.0f, &InnerView);
+	InnerView.Draw(ms_ColorSidebarBackground, IGraphics::CORNER_ALL, 8.0f);
+
+        // 2. Sidebar & rightview
+        CUIRect RightMainView, SideBar;
+        InnerView.VSplitLeft(140.0f, &SideBar, &RightMainView);
+	RightMainView.Margin(12.0f, &RightMainView);
+
+        // 3. Sidebar background
+        RightMainView.Draw(ms_ColorRightViewBackground, IGraphics::CORNER_ALL, 6.0f);
+
+        // 4. Inner Content
+        CUIRect ContentView;
+        RightMainView.Margin(15.0f, &ContentView);
+
+        // Title
+        CUIRect TitleRect;
+        SideBar.HSplitTop(40.0f, &TitleRect, &SideBar);
+
+
+        // 5. Sidebar
+        const char *apTabs[SIDEBAR_LENGTH] = {
+               Localize("Information"),
+               Localize("Visual & UI"),
+               Localize("Gameplay"),
+               Localize("Instruments")
+        };
+
+        static CButtonContainer s_aTabButtons[SIDEBAR_LENGTH];
+        CUIRect ButtonRow, Button;
+
+        for(int i = 0; i < SIDEBAR_LENGTH; i++)
+        {
+               SideBar.HSplitTop(6.0f, nullptr, &SideBar);
+               SideBar.HSplitTop(26.0f, &ButtonRow, &SideBar);
+        	CUIRect CenteredRow;
+        	ButtonRow.VSplitLeft(15.0f, nullptr, &CenteredRow);
+        	CenteredRow.VSplitLeft(110.0f, &Button, nullptr);
+
+        	bool MainTabChecked = (g_Config.m_UiSidebarPage == i && g_Config.m_UiSidebarSubPage == SUB_NONE);
+
+               if(DoButton_MenuTabSirius(&s_aTabButtons[i], apTabs[i], MainTabChecked, &Button, IGraphics::CORNER_ALL, &m_aAnimatorsSettingsTab[i], 6.0f))
+               {
+                      g_Config.m_UiSidebarPage = i;
+                      g_Config.m_UiSidebarSubPage = SUB_NONE;
+               }
+
+               // DYNAMIC VISUAL & UI
+               if(i == SIDEBAR_VISUAL && s_SubTabAnimationProgress > 0.01f)
+               {
+                      float TotalSubHeight = (((ButtonHeight + ButtonSpacing) * 2) + 2.0f) * s_SubTabAnimationProgress;
+
+                      CUIRect SubContainer;
+                      SideBar.HSplitTop(TotalSubHeight, &SubContainer, &SideBar);
+
+                      Ui()->ClipEnable(&SubContainer);
+
+                      // 1. Hud
+                      CUIRect SubButtonRow, SubButton, CenteredSubRow;
+                      SubContainer.HSplitTop(ButtonSpacing, nullptr, &SubContainer);
+                      SubContainer.HSplitTop(ButtonHeight, &SubButtonRow, &SubContainer);
+               		SubButtonRow.VSplitLeft(15.0f, nullptr, &CenteredSubRow);
+               		CenteredSubRow.VSplitLeft(110.0f, &SubButton, nullptr);
+
+                      static CButtonContainer s_HudSubBtn;
+                      if(DoButton_MenuTabSirius(&s_HudSubBtn, "Hud", (g_Config.m_UiSidebarPage == -1 && g_Config.m_UiSidebarSubPage == SUB_HUD), &SubButton, IGraphics::CORNER_ALL, &m_aAnimatorsSubTab[0], 6.0f))
+                      {
+                             g_Config.m_UiSidebarPage = -1;
+                             g_Config.m_UiSidebarSubPage = SUB_HUD;
+                      }
+
+                      // 2. Animations
+                      SubContainer.HSplitTop(ButtonSpacing, nullptr, &SubContainer);
+                      SubContainer.HSplitTop(ButtonHeight, &SubButtonRow, &SubContainer);
+               		SubButtonRow.VSplitLeft(15.0f, nullptr, &CenteredSubRow);
+               		CenteredSubRow.VSplitLeft(110.0f, &SubButton, nullptr);
+
+                      static CButtonContainer s_AnimSubBtn;
+                      if(DoButton_MenuTabSirius(&s_AnimSubBtn, "Animations", (g_Config.m_UiSidebarPage == -1 && g_Config.m_UiSidebarSubPage == SUB_ANIMATIONS), &SubButton, IGraphics::CORNER_ALL, &m_aAnimatorsSubTab[1], 6.0f))
+                      {
+                             g_Config.m_UiSidebarPage = -1;
+                             g_Config.m_UiSidebarSubPage = SUB_ANIMATIONS;
+                      }
+
+                      Ui()->ClipDisable();
+               }
+        }
+
+	// 6. Right panel
+	if(g_Config.m_UiSidebarPage == SIDEBAR_INFORMATION)
+	{
+		RenderInformationView(ContentView);
+	}
+	else if(g_Config.m_UiSidebarPage == SIDEBAR_VISUAL)
+	{
+		RenderVisualView(ContentView);
+	}
+	else if(g_Config.m_UiSidebarPage == -1 && g_Config.m_UiSidebarSubPage == SUB_HUD)
+	{
+		RenderHudView(ContentView);
+	}
+	else if(g_Config.m_UiSidebarPage == -1 && g_Config.m_UiSidebarSubPage == SUB_ANIMATIONS)
+	{
+		RenderAnimationsView(ContentView);
+	}
+	else if(g_Config.m_UiSidebarPage == SIDEBAR_GAMEPLAY)
+	{
+		RenderGameplayView(ContentView);
+	}
+	else if(g_Config.m_UiSidebarPage == SIDEBAR_INSTRUMENTS)
+	{
+		RenderInstrumentsView(ContentView);
+	}
+	else
+	{
+		dbg_assert_failed("ui_settings_page invalid");
+	}
 }
 
 void CMenus::RenderSettings(CUIRect MainView)

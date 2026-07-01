@@ -588,7 +588,7 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 	}
 	else
 	{
-		if(m_DummyFire % 25 != 0)
+		if(m_DummyFire % 1 != 0)
 		{
 			m_DummyFire++;
 			return 0;

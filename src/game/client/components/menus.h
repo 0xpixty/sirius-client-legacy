@@ -19,6 +19,7 @@
 #include <game/client/component.h>
 #include <game/client/components/community_icons.h>
 #include <game/client/components/mapimages.h>
+#include <game/client/components/menus_ingame_sirius.h>
 #include <game/client/components/menus_ingame_touch_controls.h>
 #include <game/client/components/menus_settings_controls.h>
 #include <game/client/components/menus_start.h>
@@ -86,12 +87,25 @@ class CMenus : public CComponent
 	static ColorRGBA ms_ColorTabbarHoverIngame;
 	static ColorRGBA ms_ColorTabbarInactive;
 	static ColorRGBA ms_ColorTabbarActive;
+	static ColorRGBA ms_ColorMenuBorder;
+	static ColorRGBA ms_ColorRightViewBackground;
+	static ColorRGBA ms_ColorSidebarBackground;
 	static ColorRGBA ms_ColorTabbarHover;
 
 public:
 	int DoButton_Toggle(const void *pId, int Checked, const CUIRect *pRect, bool Active, unsigned Flags = BUTTONFLAG_LEFT);
 	int DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, unsigned Flags, const char *pImageName, int Corners, float Rounding, float FontFactor, ColorRGBA Color, float Size);
 	int DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator = nullptr, const ColorRGBA *pDefaultColor = nullptr, const ColorRGBA *pActiveColor = nullptr, const ColorRGBA *pHoverColor = nullptr, float EdgeRounding = 10.0f, const CCommunityIcon *pCommunityIcon = nullptr);
+
+	int DoButton_MenuTabSirius(
+	    CButtonContainer *pButtonContainer,
+	    const char *pText,
+	    int Checked,
+	    const CUIRect *pRect,
+	    int Corners,
+	    SUIAnimator *pAnimator = nullptr,
+	    float EdgeRounding = 6.0f
+	);
 
 	int DoButton_CheckBox_Common(const void *pId, const char *pText, const char *pBoxText, const CUIRect *pRect, unsigned Flags);
 	int DoButton_CheckBox(const void *pId, const char *pText, int Checked, const CUIRect *pRect);
@@ -631,6 +645,15 @@ protected:
 	void RenderSettings(CUIRect MainView);
 	void RenderSettingsCustom(CUIRect MainView);
 
+	void RenderSirius(CUIRect MainView);
+	void RenderInformationView(CUIRect MainView);
+	void RenderVisualView(CUIRect MainView);
+	void RenderGameplayView(CUIRect MainView);
+	void RenderInstrumentsView(CUIRect MainView);
+
+	void RenderHudView(CUIRect MainView);
+	void RenderAnimationsView(CUIRect MainView);
+
 	// found in menus_settings_controls.cpp
 	// TODO: Change PopupConfirm to avoid using a function pointer to a CMenus
 	//       member function, to move this function to CMenusSettingsControls
@@ -715,12 +738,30 @@ public:
 		PAGE_FAVORITE_COMMUNITY_5,
 		PAGE_DEMOS,
 		PAGE_SETTINGS,
+		PAGE_SIRIUS,
 		PAGE_NETWORK,
 		PAGE_GHOST,
 		PAGE_ECLIENTNEWS,
 		PAGE_MODERATION,
 
 		PAGE_LENGTH,
+	};
+
+	enum
+	{
+		SUB_NONE = 0,
+		SUB_HUD,
+		SUB_ANIMATIONS
+	};
+
+	enum
+	{
+		SIDEBAR_INFORMATION,
+		SIDEBAR_VISUAL,
+		SIDEBAR_GAMEPLAY,
+		SIDEBAR_INSTRUMENTS,
+
+		SIDEBAR_LENGTH
 	};
 
 	enum
@@ -777,6 +818,7 @@ public:
 	SUIAnimator m_aAnimatorsBigPage[BIG_TAB_LENGTH];
 	SUIAnimator m_aAnimatorsSmallPage[SMALL_TAB_LENGTH];
 	SUIAnimator m_aAnimatorsSettingsTab[SETTINGS_LENGTH];
+	SUIAnimator m_aAnimatorsSubTab[2];
 
 	// DDRace
 	int DoButton_CheckBox_Tristate(const void *pId, const char *pText, TRISTATE Checked, const CUIRect *pRect);
@@ -873,8 +915,10 @@ public:
 
 private:
 	CCommunityIcons m_CommunityIcons;
+	CMenusIngameSirius m_MenusIngameSirius;
 	CMenusIngameTouchControls m_MenusIngameTouchControls;
 	friend CMenusIngameTouchControls;
+	friend CMenusIngameSirius;
 	CMenusSettingsControls m_MenusSettingsControls;
 	friend CMenusSettingsControls;
 	CMenusStart m_MenusStart;

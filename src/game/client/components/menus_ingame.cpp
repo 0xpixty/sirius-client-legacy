@@ -31,7 +31,7 @@
 #include <game/client/animstate.h>
 #include <game/client/components/countryflags.h>
 #include <game/client/components/touch_controls.h>
-#include <game/client/gameclient.h>
+#include <game/client/gameclient.h>	
 #include <game/client/ui.h>
 #include <game/client/ui_listbox.h>
 #include <game/client/ui_scrollregion.h>
@@ -43,6 +43,12 @@ using namespace std::chrono_literals;
 
 void CMenus::RenderGame(CUIRect MainView)
 {
+	if(g_Config.m_ClSiriusPauseMenu)
+	{
+		m_MenusIngameSirius.Render(MainView);
+		return;
+	}
+
 	CUIRect Button, ButtonBars, ButtonBar, ButtonBar2;
 	bool ShowDDRaceButtons = MainView.w > 855.0f;
 	MainView.HSplitTop(45.0f + (g_Config.m_ClTouchControls ? 35.0f : 0.0f), &ButtonBars, &MainView);

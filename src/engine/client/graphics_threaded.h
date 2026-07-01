@@ -1090,6 +1090,7 @@ public:
 	void DrawRectExt4(float x, float y, float w, float h, ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, float r, int Corners) override;
 	int CreateRectQuadContainer(float x, float y, float w, float h, float r, int Corners) override;
 	void DrawRect(float x, float y, float w, float h, ColorRGBA Color, int Corners, float Rounding) override;
+	void DrawRectGlow(float x, float y, float w, float h, ColorRGBA Color, float GlowSize, int Corners, float Rounding, int Steps = 4) override;
 	void DrawRectOutline(float x, float y, float w, float h, ColorRGBA Color, int Corners, int Sides, float Rounding) override;
 
 	void DrawRect4(float x, float y, float w, float h, ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, int Corners, float Rounding) override;
